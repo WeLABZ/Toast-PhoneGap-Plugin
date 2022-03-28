@@ -46,6 +46,8 @@ static const BOOL CSToastHidesOnTap             = YES;     // excludes activity 
 static const NSString * CSToastTimerKey         = @"CSToastTimerKey";
 static const NSString * CSToastActivityViewKey  = @"CSToastActivityViewKey";
 
+static UIWindow *toastWindow = NULL;
+
 static UIView *prevToast = NULL;
 
 // doesn't matter these are static
@@ -136,9 +138,21 @@ static id styling;
     }
 
     // make sure that if InAppBrowser is active, we're still showing Toasts on top of it
-    UIViewController *vc = [self getTopMostViewController];
-    UIView *v = [vc view];
-    [v addSubview:toast];
+    // UIViewController *vc = [self getTopMostViewController];
+    // UIView *v = [vc view];
+    // [v addSubview:toast];
+
+    // Use window to show toast
+    if (NULL == toastWindow) {
+        toastWindow = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
+        [toastWindow setWindowLevel:UIWindowLevelAlert];
+    }
+
+    toastWindow.frame = CGRectMake(toast.frame.origin.x, toast.frame.origin.y, 0 , 0); // Window is anchor for toast view
+    toast.frame = CGRectMake(0, 0, toast.frame.size.width, toast.frame.size.height);
+
+    [toastWindow addSubview:toast];
+    toastWindow.hidden = NO;
 
     NSNumber * opacity = styling[@"opacity"];
     CGFloat theOpacity = opacity == nil ? CSToastOpacity : [opacity floatValue];
